@@ -1,1 +1,10 @@
 go 1.21.0
+
+use (
+	.
+	./basics_ends/backend
+	./basics_ends/frontend
+	./rest_api_server
+	./rest_api_server/backend
+	./rest_api_server/frontend
+)
