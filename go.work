@@ -1,1 +1,6 @@
 go 1.21.0
+
+use (
+	./rest_api_server/backend
+	./rest_api_server/frontend
+)
