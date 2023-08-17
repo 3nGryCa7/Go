@@ -1,2 +1,2 @@
 # Go
- Self-Learning
+ Basics and Advanced Basics
