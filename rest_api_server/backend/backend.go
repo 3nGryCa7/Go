@@ -23,7 +23,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 }
 
-func (a *App) Initailize() {
+func (a *App) Initialize() {
 	DB, err := sql.Open("sqlite3", "../products.db")
 	if err != nil {
 		log.Fatal(err.Error())
@@ -132,6 +132,7 @@ func (a *App) newOrder(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		respondWithJSON(w, http.StatusOK, o)
 	}
 }
 

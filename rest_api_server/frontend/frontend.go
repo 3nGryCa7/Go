@@ -9,6 +9,6 @@ import (
 func main() {
 	a := backend.App{}
 	a.Port = ":8080"
-	a.Initailize()
+	a.Initialize()
 	a.Run()
 }
