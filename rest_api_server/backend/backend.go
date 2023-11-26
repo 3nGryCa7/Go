@@ -123,8 +123,7 @@ func (a *App) newOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, item := range o.Items {
-		var oi orderItem
-		oi = item
+		oi := item
 		oi.OrderID = o.ID
 		err := oi.createOrderItem(a.DB)
 		if err != nil {
@@ -142,8 +141,7 @@ func (a *App) newOrderItems(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &ois)
 
 	for _, item := range ois {
-		var oi orderItem
-		oi = item
+		oi := item
 		err := oi.createOrderItem(a.DB)
 		if err != nil {
 			fmt.Printf("newOrderItem error: %s", err.Error())

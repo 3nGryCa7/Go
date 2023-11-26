@@ -27,6 +27,7 @@ func getProducts(db *sql.DB) ([]product, error) {
 
 	for rows.Next() {
 		var p product
+		// 直接儲存到指標所指向的變量 (若不使用&，會產生大量複製，降低性能)
 		if err := rows.Scan(&p.ID, &p.ProductCode, &p.Name, &p.Inventory, &p.Price, &p.Status); err != nil {
 			return nil, err
 		}
