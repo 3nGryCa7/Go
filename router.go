@@ -20,7 +20,7 @@ func deleteRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "DELETE request received")
 }
 
-func main() {
+func RunRouter() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", getRequest).Methods("GET")
 	r.HandleFunc("/", postRequest).Methods("POST")

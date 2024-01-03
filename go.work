@@ -1,7 +1,7 @@
 go 1.20
 
 use (
-	./rest_api_server
+	.
 	./rest_api_server/backend
 	./rest_api_server/frontend
 )
