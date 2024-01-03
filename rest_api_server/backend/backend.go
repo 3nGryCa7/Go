@@ -163,10 +163,10 @@ func respondWithError(w http.ResponseWriter, code int, msg string) {
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	//Convert payload to json
+	// Convert payload to json
 	response, _ := json.Marshal(payload)
 
-	//Set header and write response
+	// Set header and write response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
