@@ -1,9 +1,9 @@
-package main
+package frontend
 
 import (
-	"example.com/backend"
+	backend "backend"
 )
 
-func main() {
+func Run() {
 	backend.Run(":8080")
 }
