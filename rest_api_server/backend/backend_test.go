@@ -11,14 +11,14 @@ import (
 	"net/http/httptest"
 	"strconv"
 
-	"example.com/backend"
+	"backend"
 )
 
-var a backend.App
+var app backend.App
 
 const tableProductCreationQuary = `CREATE TABLE IF NOT EXISTS products
 (
-	id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	productCode VARCHAR(25) NOT NULL,
 	name VARCHAR(256) NOT NULL,
 	inventory INT NOT NULL,
@@ -28,7 +28,7 @@ const tableProductCreationQuary = `CREATE TABLE IF NOT EXISTS products
 
 const tableOrderCreationQuary = `CREATE TABLE IF NOT EXISTS orders
 (
-	id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	customerName VARCHAR(256) NOT NULL,
 	total INT NOT NULL,
 	status VARCHAR(64) NOT NULL
@@ -45,8 +45,8 @@ const tableOrderItemCreationQuary = `CREATE TABLE IF NOT EXISTS order_items
 )`
 
 func TestMain(m *testing.M) {
-	a = backend.App{}
-	a.Initialize()
+	app = backend.App{}
+	app.Initialize()
 	ensureTableExists()
 	code := m.Run()
 
@@ -57,31 +57,31 @@ func TestMain(m *testing.M) {
 }
 
 func ensureTableExists() {
-	if _, err := a.DB.Exec(tableProductCreationQuary); err != nil {
+	if _, err := app.DB.Exec(tableProductCreationQuary); err != nil {
 		log.Fatal(err)
 	}
 
-	if _, err := a.DB.Exec(tableOrderCreationQuary); err != nil {
+	if _, err := app.DB.Exec(tableOrderCreationQuary); err != nil {
 		log.Fatal(err)
 	}
 
-	if _, err := a.DB.Exec(tableOrderItemCreationQuary); err != nil {
+	if _, err := app.DB.Exec(tableOrderItemCreationQuary); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func clearProductTable() {
-	a.DB.Exec("DELETE FROM products")
-	a.DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
+	app.DB.Exec("DELETE FROM products")
+	app.DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
 }
 
 func clearOrderTable() {
-	a.DB.Exec("DELETE FROM orders")
-	a.DB.Exec("DELETE FROM sqlite_sequence WHERE name='orders'")
+	app.DB.Exec("DELETE FROM orders")
+	app.DB.Exec("DELETE FROM sqlite_sequence WHERE name='orders'")
 }
 
 func clearOrderItemTable() {
-	a.DB.Exec("DELETE FROM order_items")
+	app.DB.Exec("DELETE FROM order_items")
 }
 
 func TestGetNonExistentProduct(t *testing.T) {
@@ -153,7 +153,7 @@ func addProducts(count int) {
 	}
 
 	for i := 0; i < count; i++ {
-		a.DB.Exec("INSERT INTO products(productCode, name, inventory, price, status) VALUES(?,?,?,?,?)", "ABC123"+strconv.Itoa(i), "Product"+strconv.Itoa(i), i, i, "test"+strconv.Itoa(i))
+		app.DB.Exec("INSERT INTO products(productCode, name, inventory, price, status) VALUES(?,?,?,?,?)", "ABC123"+strconv.Itoa(i), "Product"+strconv.Itoa(i), i, i, "test"+strconv.Itoa(i))
 	}
 }
 
@@ -216,7 +216,7 @@ func addOrders(count int) {
 	}
 
 	for i := 0; i < count; i++ {
-		a.DB.Exec("INSERT INTO orders(customerName, total, status) VALUES(?,?,?)", "Customer"+strconv.Itoa(i), i, "test"+strconv.Itoa(i))
+		app.DB.Exec("INSERT INTO orders(customerName, total, status) VALUES(?,?,?)", "Customer"+strconv.Itoa(i), i, "test"+strconv.Itoa(i))
 	}
 }
 
@@ -251,7 +251,7 @@ func TestCreateOrderItem(t *testing.T) {
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	a.Router.ServeHTTP(rr, req)
+	app.Router.ServeHTTP(rr, req)
 
 	return rr
 }

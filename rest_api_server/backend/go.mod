@@ -1,8 +1,8 @@
-module example.com/backend
+module backend
 
-go 1.21.0
+go 1.20
 
 require (
-	github.com/gorilla/mux v1.8.0
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/gorilla/mux v1.8.1
+	github.com/mattn/go-sqlite3 v1.14.19
 )

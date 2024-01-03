@@ -23,31 +23,31 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 }
 
-func (a *App) Initialize() {
+func (app *App) Initialize() {
 	DB, err := sql.Open("sqlite3", "../products.db")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	a.DB = DB
-	a.Router = mux.NewRouter()
-	a.initializeRoutes()
+	app.DB = DB
+	app.Router = mux.NewRouter()
+	app.initializeRoutes()
 }
 
-func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/", welcome)
-	a.Router.HandleFunc("/products", a.allProducts).Methods("GET")
-	a.Router.HandleFunc("/product/{id}", a.fetchProduct).Methods("GET")
-	a.Router.HandleFunc("/products", a.newProduct).Methods("POST")
+func (app *App) initializeRoutes() {
+	app.Router.HandleFunc("/", welcome)
+	app.Router.HandleFunc("/products", app.allProducts).Methods("GET")
+	app.Router.HandleFunc("/product/{id}", app.fetchProduct).Methods("GET")
+	app.Router.HandleFunc("/products", app.newProduct).Methods("POST")
 
-	a.Router.HandleFunc("/orders", a.allOrders).Methods("GET")
-	a.Router.HandleFunc("/order/{id}", a.fetchOrder).Methods("GET")
-	a.Router.HandleFunc("/orders", a.newOrder).Methods("POST")
-	a.Router.HandleFunc("/orderItems", a.newOrderItems).Methods("POST")
+	app.Router.HandleFunc("/orders", app.allOrders).Methods("GET")
+	app.Router.HandleFunc("/order/{id}", app.fetchOrder).Methods("GET")
+	app.Router.HandleFunc("/orders", app.newOrder).Methods("POST")
+	app.Router.HandleFunc("/orderItems", app.newOrderItems).Methods("POST")
 }
 
-func (a *App) allProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := getProducts(a.DB)
+func (app *App) allProducts(w http.ResponseWriter, r *http.Request) {
+	products, err := getProducts(app.DB)
 	if err != nil {
 		fmt.Printf("getProducts error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -56,13 +56,13 @@ func (a *App) allProducts(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, products)
 }
 
-func (a *App) fetchProduct(w http.ResponseWriter, r *http.Request) {
+func (app *App) fetchProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	var p product
 	p.ID, _ = strconv.Atoi(id)
-	err := p.getProduct(a.DB)
+	err := p.getProduct(app.DB)
 	if err != nil {
 		fmt.Printf("getProduct error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -71,12 +71,12 @@ func (a *App) fetchProduct(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
-func (a *App) newProduct(w http.ResponseWriter, r *http.Request) {
+func (app *App) newProduct(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := io.ReadAll(r.Body)
 	var p product
 	json.Unmarshal(reqBody, &p)
 
-	err := p.createProduct(a.DB)
+	err := p.createProduct(app.DB)
 	if err != nil {
 		fmt.Printf("newProduct error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -85,8 +85,8 @@ func (a *App) newProduct(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
-func (a *App) allOrders(w http.ResponseWriter, r *http.Request) {
-	orders, err := getOrders(a.DB)
+func (app *App) allOrders(w http.ResponseWriter, r *http.Request) {
+	orders, err := getOrders(app.DB)
 	if err != nil {
 		fmt.Printf("getOrders error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -95,13 +95,13 @@ func (a *App) allOrders(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, orders)
 }
 
-func (a *App) fetchOrder(w http.ResponseWriter, r *http.Request) {
+func (app *App) fetchOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	var o order
 	o.ID, _ = strconv.Atoi(id)
-	err := o.getOrder(a.DB)
+	err := o.getOrder(app.DB)
 	if err != nil {
 		fmt.Printf("getOrder error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -110,12 +110,12 @@ func (a *App) fetchOrder(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, o)
 }
 
-func (a *App) newOrder(w http.ResponseWriter, r *http.Request) {
+func (app *App) newOrder(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := io.ReadAll(r.Body)
 
 	var o order
 	json.Unmarshal(reqBody, &o)
-	err := o.createOrder(a.DB)
+	err := o.createOrder(app.DB)
 	if err != nil {
 		fmt.Printf("newOrder error: %s", err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -123,10 +123,9 @@ func (a *App) newOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, item := range o.Items {
-		var oi orderItem
-		oi = item
+		oi := item
 		oi.OrderID = o.ID
-		err := oi.createOrderItem(a.DB)
+		err := oi.createOrderItem(app.DB)
 		if err != nil {
 			fmt.Printf("newOrderItem error: %s", err.Error())
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -136,15 +135,14 @@ func (a *App) newOrder(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) newOrderItems(w http.ResponseWriter, r *http.Request) {
+func (app *App) newOrderItems(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := io.ReadAll(r.Body)
 	var ois []orderItem
 	json.Unmarshal(reqBody, &ois)
 
 	for _, item := range ois {
-		var oi orderItem
-		oi = item
-		err := oi.createOrderItem(a.DB)
+		oi := item
+		err := oi.createOrderItem(app.DB)
 		if err != nil {
 			fmt.Printf("newOrderItem error: %s", err.Error())
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -154,9 +152,9 @@ func (a *App) newOrderItems(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, ois)
 }
 
-func (a *App) Run() {
-	fmt.Println("Starting server on port ", a.Port)
-	log.Fatal(http.ListenAndServe(a.Port, a.Router))
+func (app *App) Run() {
+	fmt.Println("Starting server on port ", app.Port)
+	log.Fatal(http.ListenAndServe(app.Port, app.Router))
 }
 
 // Helper functions

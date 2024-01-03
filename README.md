@@ -1,2 +1,0 @@
-# Go
-Rest API Server

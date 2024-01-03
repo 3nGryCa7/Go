@@ -1,14 +1,14 @@
 package main
 
 import (
-	"example.com/backend"
+	backend "backend"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	a := backend.App{}
-	a.Port = ":8080"
-	a.Initialize()
-	a.Run()
+	app := backend.App{}
+	app.Port = ":8080"
+	app.Initialize()
+	app.Run()
 }
