@@ -1,6 +1,8 @@
 package main
 
-import "frontend"
+import (
+	frontend "frontend"
+)
 
 func main() {
 	frontend.Run()
