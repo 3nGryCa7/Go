@@ -9,20 +9,19 @@ import (
 type order struct {
 	ID           int         `json:"id"`
 	CustomerName string      `json:"customerName"`
-	Total        int         `json:"totalPrice"`
+	Total        int         `json:"total"`
 	Status       string      `json:"status"`
 	Items        []orderItem `json:"items"`
 }
 
 type orderItem struct {
-	OrderID   int `json:"orderId"`
-	ProductID int `json:"productId"`
+	OrderID   int `json:"order_id"`
+	ProductID int `json:"product_id"`
 	Quantity  int `json:"quantity"`
 }
 
 func getOrders(db *sql.DB) ([]order, error) {
 	rows, err := db.Query("SELECT * FROM orders")
-
 	if err != nil {
 		return nil, err
 	}
@@ -35,17 +34,25 @@ func getOrders(db *sql.DB) ([]order, error) {
 		if err := rows.Scan(&o.ID, &o.CustomerName, &o.Total, &o.Status); err != nil {
 			return nil, err
 		}
-		if err := o.getOrderItems(db); err != nil {
+
+		err = o.getOrderItems(db)
+		if err != nil {
 			return nil, err
 		}
+
 		orders = append(orders, o)
 	}
-	return orders, err
+
+	return orders, nil
 }
 
 func (o *order) getOrder(db *sql.DB) error {
-	db.QueryRow("SELECT customerName, total, status FROM orders WHERE id=?", o.ID).Scan(&o.CustomerName, &o.Total, &o.Status)
-	err := o.getOrderItems(db)
+	err := db.QueryRow("SELECT customerName, total, status FROM orders WHERE id = ?", o.ID).Scan(&o.CustomerName, &o.Total, &o.Status)
+	if err != nil {
+		return err
+	}
+
+	err = o.getOrderItems(db)
 	if err != nil {
 		return err
 	}
@@ -53,7 +60,7 @@ func (o *order) getOrder(db *sql.DB) error {
 }
 
 func (o *order) getOrderItems(db *sql.DB) error {
-	rows, err := db.Query("SELECT * FROM orderItems WHERE orderId=?", o.ID)
+	rows, err := db.Query("SELECT * FROM order_items WHERE order_id = ?", o.ID)
 	if err != nil {
 		return err
 	}
@@ -68,6 +75,7 @@ func (o *order) getOrderItems(db *sql.DB) error {
 		}
 		orderItems = append(orderItems, oi)
 	}
+
 	o.Items = orderItems
 	return nil
 }
@@ -82,14 +90,17 @@ func (o *order) createOrder(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+
 	o.ID = int(id)
+
 	return nil
 }
 
 func (oi *orderItem) createOrderItem(db *sql.DB) error {
-	_, err := db.Exec("INSERT INTO orderItems(orderId, productId, quantity) VALUES(?, ?, ?)", oi.OrderID, oi.ProductID, oi.Quantity)
+	_, err := db.Exec("INSERT INTO order_items(order_id, product_id, quantity) VALUES(?, ?, ?)", oi.OrderID, oi.ProductID, oi.Quantity)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
